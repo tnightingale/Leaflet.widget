@@ -1,68 +1,78 @@
-L.Widget = L.Class.extend({
+L.Map.mergeOptions({
+    widget: false
+});
+
+L.Handler.Widget = L.Handler.extend({
+    includes: L.Mixin.Events,
+
     options: {
         defaultVectorStyle: {
-            color: '#0033ff',
+            color: '#0033ff'
         },
         selectedVectorStyle: {
-            color: '#F00',
+            color: '#F00'
+        },
+        drawVectorStyle: {
+            color: '#F0F'
         }
     },
 
-    /**
-     * Initialize map & widget.
-     */
-    initialize: function (item, data, options) {
+    initialize: function (map, options) {
+        this._map = map;
+
         L.Util.setOptions(this, options);
 
-        var shape_options = {
-                color: '#F0F',
-                opacity: 0.9,
-                fillColor: '#F0F',
-                fillOpacity: 0.2
-            },
-            draw_control = new L.Control.Draw({
-                position: 'topright',
-                polyline: { shapeOptions: shape_options },
-                polygon: { shapeOptions: shape_options },
-                circle: false,
-                rectangle: false
-            });
-
-        // Init map.
-        this._map = L.map(item {
-            layers: [L.tileLayer(options.baseUrl)]
-        });
-
-        // Add controls.
-        this._map.addControl(draw_control);
-
-        // Adding layers.
-        this.vectors = L.layerGroup().addTo(this._map);
-
-        // Load existing data.
-        this.unserialize(data);
-
-        // Map event handlers.
-        this._map.on({
-            'draw:poly-created draw:marker-created': this._onCreated,
-            selected: this._onSelected,
-            deselected: this._onDeselected,
-            layerremove: this._unbind
-        }, this);
-
-        this._map.setView([49.26, -123.11], 10);
+        if (!this._map.drawControl) {
+            this._initDraw();
+        }
     },
 
-    /**
-     * Add vector layers.
-     */
+    addHooks: function () {
+        if (this._map && this.options.attach) {
+            this.vectors = L.layerGroup().addTo(this._map);
+            this._attach = L.DomUtil.get(this.options.attach);
+            this.load(this._attach.value);
+
+            // Map event handlers.
+            this._map.on({
+                'draw:poly-created draw:marker-created': this._onCreated,
+                'selected': this._onSelected,
+                'deselected': this._onDeselected,
+                'layerremove': this._unbind
+            }, this);
+        }
+    },
+
+    removeHooks: function () {
+        if (this._map) {
+            this._map.removeLayer(this.vectors);
+            delete this.vectors;
+
+            this._map.off({
+                'draw:poly-created draw:marker-created': this._onCreated,
+                'selected': this._onSelected,
+                'deselected': this._onDeselected,
+                'layerremove': this._unbind
+            }, this);
+        }
+    },
+
+    _initDraw: function () {
+        new L.Control.Draw({
+            position: 'topright',
+            polyline: { shapeOptions: this.options.drawVectorStyle },
+            polygon: { shapeOptions: this.options.drawVectorStyle },
+            circle: false,
+            rectangle: false
+        }).addTo(this._map);
+    },
+
+    // Add vector layers.
     _addVector: function (feature) {
         this.vectors.addLayer(feature);
     },
 
-    /**
-     * Handle features drawn by user.
-     */
+    // Handle features drawn by user.
     _onCreated: function (e) {
         var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0];
         vector = e[key] || false;
@@ -91,21 +101,24 @@ L.Widget = L.Class.extend({
         this.vectors.removeLayer(layer);
     },
 
-    /**
-     * Read GeoJSON features into widget vector layers.
-     */
-    unserialize: function (data) {
-        var on_each = function (feature, layer) { this._addVector(layer) },
-            options = {
-                onEachFeature: L.Util.bind(on_each, this)
+    // Read GeoJSON features into widget vector layers.
+    load: function (geojson) {
+        var data = typeof geojson === 'string' ? JSON.parse(geojson) : geojson,
+            on_each = function (feature, layer) {
+                this._addVector(layer);
             };
-        return L.geoJson(data, options);
+
+        if (!data) {
+            return;
+        }
+
+        return L.geoJson(data, {
+            onEachFeature: L.Util.bind(on_each, this)
+        });
     },
 
-    /**
-     * Write widget vector layers to GeoJSON.
-     */
-    serialize: function () {
+    // Write widget vector layers to GeoJSON.
+    toGeoJSON: function () {
         var geometry,
             features = [];
 
@@ -114,19 +127,14 @@ L.Widget = L.Class.extend({
             features.push(this.feature(geometry));
         }, this);
 
-        return JSON.stringify(this.featureCollection(features));
+        return this.featureCollection(features);
     },
 
-    getSubmitHandler: function (dest) { /* dest: HTML Element */
-        return L.Util.bind(function submit_handler() {
-            dest.val(this.serialize());
-        }, this);
+    write: function () {
+        var obj = this.toGeoJSON();
+        this._attach.value = JSON.stringify(obj);
     },
 
-    /**
-     * TODO: Break this up into individual 'toGeomtery' methods on each 
-     *       vector layer.
-     */
     vectorToGeometry: function (vector) {
         var geometry = {};
 
@@ -200,5 +208,12 @@ L.Widget = L.Class.extend({
 
     _latLngToCoord: function (latlng) {
         return [latlng.lng, latlng.lat];
+    }
+});
+
+L.Map.addInitHook(function () {
+    if (this.options.widget) {
+        var options = this.options.widget;
+        this.widget = new L.Handler.Widget(this, options);
     }
 });

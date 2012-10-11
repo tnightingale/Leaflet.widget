@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Leaflet</title>
+    <script src="../lib/Leaflet/leaflet-src.js"></script>
+    <link rel="stylesheet" href="../lib/Leaflet/leaflet.css" />
+    <script src="../lib/Leaflet.draw/Leaflet.draw-src.js"></script>
+    <link rel="stylesheet" href="../lib/Leaflet.draw/leaflet.draw.css" />
+    <script src="../src/Leaflet.select.js"></script>
+    <script src="../src/Leaflet.widget.js"></script>
+    <link rel="stylesheet" href="../dist/select.css" />
+  </head>
+  <body>
+    <div style="width:100%; height:500px" id="leaflet-widget-map"></div>
+    <form id='leaflet-widget-form'>
+      <textarea style="width:400px; height:150px" id='leaflet-widget-input'>
+{
+  "type": "MultiPolygon",
+  "coordinates": [
+    [
+      [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+    ],
+    [
+      [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+    ]
+  ]
+}
+      </textarea>
+      <input type='submit' />
+    </form>
+    <script type='text/javascript'>
+      var map = L.map('leaflet-widget-map', {
+            center: [0.0, 100.0],
+            zoom: 5,
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            widget: { attach: 'leaflet-widget-input' }
+          });
+      map.widget.enable();
+
+      var form = L.DomUtil.get('leaflet-widget-form');
+          L.DomEvent.on(form, 'submit', map.widget.write, map.widget);
+          L.DomEvent.on(form, 'submit', L.DomEvent.preventDefault);
+    </script>
+  </body>
+</html>
