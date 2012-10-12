@@ -4,7 +4,7 @@ L.Control.Draw.mergeOptions({
     }
 });
 
-// TODO: Remove hack to 'open' class.
+// TODO: Remove hack to 'open' object.
 var onAdd = L.Control.Draw.prototype.onAdd;
 
 L.Control.Draw.include({
@@ -31,30 +31,30 @@ L.Control.Draw.include({
 L.Handler.Select = L.Handler.extend({
     includes: L.Mixin.Events,
 
+    options: {
+
+    },
+
     initialize: function (map, options) {
+        L.Util.setOptions(this, options);
         this._map = map;
     },
 
     enable: function () {
-        // this.fire('activated');
-        // L.Handler.prototype.enable.call(this);
-        this._myEnabled = true;
-    },
-
-    disable: function () {
-        // L.Handler.prototype.disable.call(this);
-        this._myEnabled = false;
-    },
-
-    enabled: function () {
-        // return L.Handler.prototype.enabled.call(this);
-        return this._myEnabled;
+        this.fire('activated');
+        L.Handler.prototype.enable.call(this);
     },
 
     // Called when handler is enabled.
     addHooks: function () {
-        if (this._map) {
-            this._selected = L.layerGroup()
+        if (this._map && this.options.selectable) {
+            this._selected = L.layerGroup();
+            this._selectable = this.options.selectable;
+
+            this._selectable.eachLayer(function (layer) {
+                this._bind(layer);
+            }, this);
+
             this._map.on({
                 layeradd: this._bind,
                 layerremove: this._unbind
@@ -64,7 +64,7 @@ L.Handler.Select = L.Handler.extend({
 
     // Called when handler is disabled.
     removeHooks: function () {
-        if (this._map) {
+        if (this._map && this._selectable) {
             // Clean up selected layers.
             this.applyToSelected(function (layer) {
                 layer.off('click', this.select);
@@ -72,6 +72,10 @@ L.Handler.Select = L.Handler.extend({
                 this._selected.removeLayer(layer);
             }, this);
             delete this._selected;
+
+            this._selectable.eachLayer(function (layer) {
+                this._unbind(layer);
+            }, this);
 
             this._map.off({
                 layeradd: this._bind,
@@ -101,18 +105,24 @@ L.Handler.Select = L.Handler.extend({
     },
 
     _bind: function (e) {
-        var layer = e.layer;
-        if (layer instanceof L.Marker || layer instanceof L.Path) {
+        var layer = e.layer ? e.layer : e;
+        if (L.LayerGroup.hasLayer.call(this._selectable, layer)) {
             layer.on('click', this.select, this);
         }
     },
 
     _unbind: function (e) {
-        var layer = e.layer;
-        if (layer instanceof L.Marker || layer instanceof L.Path) {
+        var layer = e.layer ? e.layer : e;
+        if (L.LayerGroup.hasLayer.call(this._selectable, layer)) {
             this._selected.removeLayer(layer);
             layer.off('click');
         }
+    }
+});
+
+L.Util.extend(L.LayerGroup, {
+    hasLayer: function (layer) {
+        return !!this._layers[L.Util.stamp(layer)];
     }
 });
 
@@ -121,7 +131,7 @@ L.Handler.Select = L.Handler.extend({
 L.Control.Select = L.Control.extend({
     options: {
         position: 'bottomright',
-        delete: true
+        remove: true
     },
 
     onAdd: function (map) {
@@ -130,8 +140,8 @@ L.Control.Select = L.Control.extend({
         var class_name = 'leaflet-select-control',
             container = L.DomUtil.create('div', class_name);
 
-        if (this.options.delete) {
-            this._createButton('Delete selected features', class_name + '-delete', container, this._delete, this);
+        if (this.options.remove) {
+            this._createButton('Remove selected features', class_name + '-remove', container, this._delete, this);
         }
 
         return container;

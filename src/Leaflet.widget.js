@@ -33,6 +33,8 @@ L.Handler.Widget = L.Handler.extend({
             this._attach = L.DomUtil.get(this.options.attach);
             this.load(this._attach.value);
 
+            this._map.drawControl.handlers.select.options.selectable = this.vectors;
+
             // Map event handlers.
             this._map.on({
                 'draw:poly-created draw:marker-created': this._onCreated,
@@ -58,7 +60,7 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     _initDraw: function () {
-        new L.Control.Draw({
+        this._map.drawControl = new L.Control.Draw({
             position: 'topright',
             polyline: { shapeOptions: this.options.drawVectorStyle },
             polygon: { shapeOptions: this.options.drawVectorStyle },
@@ -74,8 +76,8 @@ L.Handler.Widget = L.Handler.extend({
 
     // Handle features drawn by user.
     _onCreated: function (e) {
-        var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0];
-        vector = e[key] || false;
+        var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0],
+            vector = e[key] || false;
 
         if (vector) {
             this._addVector(vector);
@@ -159,7 +161,9 @@ L.Handler.Widget = L.Handler.extend({
                 var obj = this.vectorToGeometry(layer);
                 // We're assuming a FeatureGroup only contains Points
                 // (currently no support for 'GeometryCollections').
-                if (obj.type !== "Point") return;
+                if (obj.type !== "Point") {
+                    return;
+                }
                 geometry.coordinates.push(obj.coordinates);
             }, this);
         }
