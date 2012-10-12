@@ -67,15 +67,12 @@ L.Handler.Select = L.Handler.extend({
         if (this._map && this._selectable) {
             // Clean up selected layers.
             this.applyToSelected(function (layer) {
-                layer.off('click', this.select);
-                layer.off('click', this.deselect);
-                this._selected.removeLayer(layer);
+                this.deselect
             }, this);
-            delete this._selected;
-
             this._selectable.eachLayer(function (layer) {
                 this._unbind(layer);
             }, this);
+            delete this._selected;
 
             this._map.off({
                 layeradd: this._bind,
@@ -85,7 +82,7 @@ L.Handler.Select = L.Handler.extend({
     },
 
     select: function (e) {
-        var layer = e.layer;
+        var layer = e.layer ? e.layer : e;
         layer.off('click', this.select);
         layer.on('click', this.deselect, this);
         this._selected.addLayer(layer);
@@ -93,7 +90,7 @@ L.Handler.Select = L.Handler.extend({
     },
 
     deselect: function (e) {
-        var layer = e.layer;
+        var layer = e.layer ? e.layer : e;
         layer.off('click', this.deselect);
         layer.on('click', this.select, this);
         this._selected.removeLayer(layer);
@@ -106,21 +103,21 @@ L.Handler.Select = L.Handler.extend({
 
     _bind: function (e) {
         var layer = e.layer ? e.layer : e;
-        if (L.LayerGroup.hasLayer.call(this._selectable, layer)) {
+        if (this._selectable.hasLayer(layer)) {
             layer.on('click', this.select, this);
         }
     },
 
     _unbind: function (e) {
         var layer = e.layer ? e.layer : e;
-        if (L.LayerGroup.hasLayer.call(this._selectable, layer)) {
-            this._selected.removeLayer(layer);
-            layer.off('click');
+        if (this._selectable.hasLayer(layer)) {
+            this.deselect(layer);
+            layer.off('click', this.select);
         }
     }
 });
 
-L.Util.extend(L.LayerGroup, {
+L.LayerGroup.include({
     hasLayer: function (layer) {
         return !!this._layers[L.Util.stamp(layer)];
     }

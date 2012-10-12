@@ -86,16 +86,16 @@ L.Handler.Widget = L.Handler.extend({
 
     _onSelected: function (e) {
         var layer = e.layer;
-        if (layer instanceof L.Path) {
+        // if (layer instanceof L.Path) {
             layer.setStyle(this.options.selectedVectorStyle);
-        }
+        // }
     },
 
     _onDeselected: function (e) {
         var layer = e.layer;
-        if (layer instanceof L.Path) {
+        // if (layer instanceof L.Path) {
             layer.setStyle(this.options.defaultVectorStyle);
-        }
+        // }
     },
 
     _unbind: function (e) {
