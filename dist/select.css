@@ -36,3 +36,12 @@
 .marker-selected {
   opacity: 0.5;
 }
+
+.leaflet-select-control-remove {
+  background-image: url(images/remove-icon.png);
+}
+
+.leaflet-control-draw-select {
+  background-image: url(images/select-icon.png);
+}
+

@@ -127,8 +127,6 @@ L.LayerGroup.include({
     }
 });
 
-//L.Map.addInitHook('addHandler', 'select', L.Map.Select);
-
 L.Control.Select = L.Control.extend({
     options: {
         position: 'bottomright',
@@ -142,7 +140,12 @@ L.Control.Select = L.Control.extend({
             container = L.DomUtil.create('div', class_name);
 
         if (this.options.remove) {
-            this._createButton('Remove selected features', class_name + '-remove', container, this._delete, this);
+            this._createButton('Remove selected features',
+                    class_name + '-remove',
+                    container,
+                    this._delete,
+                    this
+            );
         }
 
         return container;
