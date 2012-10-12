@@ -56,6 +56,8 @@ L.Handler.Select = L.Handler.extend({
             }, this);
 
             this._map.on({
+                // TODO: Determine whether this is necessary: can layers be
+                //       added while this handler is enabled?
                 layeradd: this._bind,
                 layerremove: this._unbind
             }, this);
@@ -66,9 +68,6 @@ L.Handler.Select = L.Handler.extend({
     removeHooks: function () {
         if (this._map && this._selectable) {
             // Clean up selected layers.
-            this.applyToSelected(function (layer) {
-                this.deselect
-            }, this);
             this._selectable.eachLayer(function (layer) {
                 this._unbind(layer);
             }, this);
