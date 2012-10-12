@@ -82,19 +82,22 @@ L.Handler.Select = L.Handler.extend({
     },
 
     select: function (e) {
-        var layer = e.layer ? e.layer : e;
+        var layer = e.layer || e.target || e;
         layer.off('click', this.select);
         layer.on('click', this.deselect, this);
         this._selected.addLayer(layer);
         this._map.fire('selected', { layer: layer });
     },
 
-    deselect: function (e) {
-        var layer = e.layer ? e.layer : e;
+    deselect: function (e, permanent) {
+        var layer = e.layer || e.target || e;
         layer.off('click', this.deselect);
-        layer.on('click', this.select, this);
         this._selected.removeLayer(layer);
         this._map.fire('deselected', { layer: layer });
+
+        if (!permanent) {
+            layer.on('click', this.select, this);
+        }
     },
 
     applyToSelected: function (callback, context) {
@@ -111,8 +114,9 @@ L.Handler.Select = L.Handler.extend({
     _unbind: function (e) {
         var layer = e.layer ? e.layer : e;
         if (this._selectable.hasLayer(layer)) {
-            this.deselect(layer);
-            layer.off('click', this.select);
+            if (this._selected.hasLayer(layer)) {
+                this.deselect(layer, true);
+            }
         }
     }
 });
@@ -145,7 +149,7 @@ L.Control.Select = L.Control.extend({
     },
 
     _delete: function () {
-        this._map.select.applyToSelected(function (layer) {
+        this._map.drawControl.handlers.select.applyToSelected(function (layer) {
             this._map.removeLayer(layer);
         }, this);
     },

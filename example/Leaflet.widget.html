@@ -32,7 +32,8 @@
             center: [0.0, 100.0],
             zoom: 5,
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-            widget: { attach: 'leaflet-widget-input' }
+            widget: { attach: 'leaflet-widget-input' },
+            select: true
           });
       map.widget.enable();
 

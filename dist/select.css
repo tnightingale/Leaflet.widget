@@ -25,11 +25,14 @@
 }
 .leaflet-select-control a:first-child{
   margin-top: 0;
-} 	
+} 
 .leaflet-select-control a:hover {
   background-color: #fff;
 }
 .leaflet-touch .leaflet-select-control a {
   width: 27px;
   height: 27px;
-}	
+}
+.marker-selected {
+  opacity: 0.5;
+}

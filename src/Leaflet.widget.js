@@ -13,7 +13,8 @@ L.Handler.Widget = L.Handler.extend({
             color: '#F00'
         },
         drawVectorStyle: {
-            color: '#F0F'
+            color: '#F0F',
+            clickable: true
         }
     },
 
@@ -86,16 +87,25 @@ L.Handler.Widget = L.Handler.extend({
 
     _onSelected: function (e) {
         var layer = e.layer;
-        // if (layer instanceof L.Path) {
+        if (layer.setStyle) {
             layer.setStyle(this.options.selectedVectorStyle);
-        // }
+        }
+        else {
+            var icon = layer.options.icon;
+            icon.options.className = 'marker-selected';
+            layer.setIcon(icon);
+            icon.options.className = '';
+        }
     },
 
     _onDeselected: function (e) {
         var layer = e.layer;
-        // if (layer instanceof L.Path) {
+        if (layer.setStyle) {
             layer.setStyle(this.options.defaultVectorStyle);
-        // }
+        }
+        else {
+            layer.setIcon(layer.options.icon);
+        }
     },
 
     _unbind: function (e) {
