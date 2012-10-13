@@ -49,8 +49,8 @@ L.DomEvent.on(form, 'submit', map.widget.write, map.widget);
 ```
 
 ## Requires
-- [Leaflet] _Included in /lib._
-- [Leaflet.draw] _Included in /lib._
+- [Leaflet] - _Included in /lib._
+- [Leaflet.draw] - _Included in /lib._
 
 [Leaflet]: leaflet.cloudmade.com
 [Leaflet.draw]: https://github.com/jacobtoye/Leaflet.draw
