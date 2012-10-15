@@ -31,9 +31,7 @@ L.Control.Draw.include({
 L.Handler.Select = L.Handler.extend({
     includes: L.Mixin.Events,
 
-    options: {
-
-    },
+    options: {},
 
     initialize: function (map, options) {
         L.Util.setOptions(this, options);

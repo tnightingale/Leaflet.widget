@@ -87,6 +87,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onSelected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.selectedVectorStyle);
         }
@@ -100,6 +101,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onDeselected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.defaultVectorStyle);
         }
