@@ -29,4 +29,4 @@ L.GeoJSONUtil = {
     latLngToCoord: function (latlng) {
         return [latlng.lng, latlng.lat];
     }
-}
+};

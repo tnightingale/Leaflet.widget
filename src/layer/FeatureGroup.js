@@ -1,7 +1,7 @@
 L.FeatureGroup.include({
     toGeometry: function () {
         var coords = [];
-        vector.eachLayer(function (layer) {
+        this.eachLayer(function (layer) {
             var geom = layer.toGeometry();
             if (geom.type !== "Point") {
                 // We're assuming a FeatureGroup only contains Points

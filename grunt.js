@@ -21,7 +21,19 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ['<banner:meta.banner>', '<file_strip_banner:src/Leaflet.select.js>', '<file_strip_banner:src/<%= pkg.name %>.js>'],
+        src: [
+          '<banner:meta.banner>',
+          '<file_strip_banner:src/util/GeoJSONUtil.js>',
+          '<file_strip_banner:src/layer/Path.js>',
+          '<file_strip_banner:src/layer/FeatureGroup.js>',
+          '<file_strip_banner:src/layer/Marker.js>',
+          '<file_strip_banner:src/layer/Polyline.js>',
+          '<file_strip_banner:src/layer/Polygon.js>',
+          '<file_strip_banner:src/layer/MultiPolyLine.js>',
+          '<file_strip_banner:src/layer/MultiPolygon.js>',
+          '<file_strip_banner:src/Select.js>',
+          '<file_strip_banner:src/Widget.js>'
+        ],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
