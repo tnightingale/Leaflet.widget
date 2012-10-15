@@ -17,6 +17,7 @@ Implemented actions:
 ## Usage
 
 To use:
+
 1. Include an options object under a 'widget' property in your Leaflet 
    map's options. The object must contain a 'attach' property with its value being 
    an HTML element (or the id of one) to bind to.
