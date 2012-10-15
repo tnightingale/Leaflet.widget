@@ -24,6 +24,7 @@ module.exports = function(grunt) {
         src: [
           '<banner:meta.banner>',
           '<file_strip_banner:src/util/GeoJSONUtil.js>',
+          '<file_strip_banner:src/layer/WidgetFeatureGroup.js>',
           '<file_strip_banner:src/layer/Path.js>',
           '<file_strip_banner:src/layer/FeatureGroup.js>',
           '<file_strip_banner:src/layer/Marker.js>',

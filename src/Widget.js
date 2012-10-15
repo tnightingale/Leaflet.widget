@@ -30,7 +30,7 @@ L.Handler.Widget = L.Handler.extend({
 
     addHooks: function () {
         if (this._map && this.options.attach) {
-            this.vectors = L.featureGroup().addTo(this._map);
+            this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
             this.load(this._attach.value);
 

@@ -55,6 +55,21 @@ L.GeoJSONUtil = {
     }
 };
 
+L.WidgetFeatureGroup = L.LayerGroup.extend({
+    toGeoJSON: function () {
+        var features = [];
+        this.eachLayer(function (layer) {
+            features.push(layer.toGeoJSON());
+        });
+
+        return L.GeoJSONUtil.featureCollection(features);
+    }
+});
+
+L.widgetFeatureGroup = function (layers) {
+    return new L.WidgetFeatureGroup(layers);
+};
+
 L.Path.include({
     toGeoJSON: function () {
         return L.GeoJSONUtil.feature(this.toGeometry());
@@ -78,15 +93,6 @@ L.FeatureGroup.include({
             type: "MultiPoint",
             coordinates: coords
         };
-    },
-
-    toGeoJSON: function () {
-        var features = [];
-        this.eachLayer(function (layer) {
-            features.push(layer.toGeoJSON());
-        });
-
-        return L.GeoJSONUtil.featureCollection(features);
     }
 });
 
@@ -191,9 +197,7 @@ L.Control.Draw.include({
 L.Handler.Select = L.Handler.extend({
     includes: L.Mixin.Events,
 
-    options: {
-
-    },
+    options: {},
 
     initialize: function (map, options) {
         L.Util.setOptions(this, options);
@@ -375,7 +379,7 @@ L.Handler.Widget = L.Handler.extend({
 
     addHooks: function () {
         if (this._map && this.options.attach) {
-            this.vectors = L.featureGroup().addTo(this._map);
+            this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
             this.load(this._attach.value);
 
@@ -432,6 +436,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onSelected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.selectedVectorStyle);
         }
@@ -445,6 +450,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onDeselected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.defaultVectorStyle);
         }
