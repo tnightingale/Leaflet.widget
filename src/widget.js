@@ -30,7 +30,7 @@ L.Handler.Widget = L.Handler.extend({
 
     addHooks: function () {
         if (this._map && this.options.attach) {
-            this.vectors = L.layerGroup().addTo(this._map);
+            this.vectors = L.featureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
             this.load(this._attach.value);
 
@@ -110,7 +110,9 @@ L.Handler.Widget = L.Handler.extend({
 
     _unbind: function (e) {
         var layer = e.layer;
-        this.vectors.removeLayer(layer);
+        if (this.vectors.hasLayer(layer)) {
+            this.vectors.removeLayer(layer);
+        }
     },
 
     // Read GeoJSON features into widget vector layers.
@@ -130,98 +132,9 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     // Write widget vector layers to GeoJSON.
-    toGeoJSON: function () {
-        var geometry,
-            features = [];
-
-        this.vectors.eachLayer(function (layer) {
-            geometry = this.vectorToGeometry(layer);
-            features.push(this.feature(geometry));
-        }, this);
-
-        return this.featureCollection(features);
-    },
-
     write: function () {
-        var obj = this.toGeoJSON();
+        var obj = this.vectors.toGeoJSON();
         this._attach.value = JSON.stringify(obj);
-    },
-
-    vectorToGeometry: function (vector) {
-        var geometry = {};
-
-        if (vector instanceof L.MultiPolygon) {
-            geometry.type = "MultiPolygon";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                geometry.coordinates.push(this.vectorToGeometry(layer).coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.MultiPolyline) {
-            geometry.type = "MultiLineString";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                geometry.coordinates.push(this.vectorToGeometry(layer).coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.FeatureGroup) {
-            geometry.type = "MultiPoint";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                var obj = this.vectorToGeometry(layer);
-                // We're assuming a FeatureGroup only contains Points
-                // (currently no support for 'GeometryCollections').
-                if (obj.type !== "Point") {
-                    return;
-                }
-                geometry.coordinates.push(obj.coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.Polygon) {
-            geometry.type = "Polygon";
-            geometry.coordinates = [this._latLngsToCoords(vector.getLatLngs())];
-        }
-        else if (vector instanceof L.Polyline) {
-            geometry.type = "LineString";
-            geometry.coordinates = this._latLngsToCoords(vector.getLatLngs());
-        }
-        else if (vector instanceof L.Marker) {
-            geometry.type = "Point";
-            geometry.coordinates = this._latLngToCoord(vector.getLatLng());
-        }
-
-        return geometry;
-    },
-
-    featureCollection: function (features) {
-        return {
-            type: 'FeatureCollection',
-            features: features || []
-        };
-    },
-
-    feature: function (geometry, properties) {
-        return {
-            "type": "Feature",
-            "geometry": geometry,
-            "properties": properties || {}
-        };
-    },
-
-    _latLngsToCoords: function (latlngs) {
-        var coords = [],
-            coord;
-
-        for (var i = 0, len = latlngs.length; i < len; i++) {
-            coord = this._latLngToCoord(latlngs[i]);
-            coords.push(coord);
-        }
-
-        return coords;
-    },
-
-    _latLngToCoord: function (latlng) {
-        return [latlng.lng, latlng.lat];
     }
 });
 
