@@ -22,6 +22,148 @@
             return '"' + this + '"';
         }; */
 
+L.GeoJSONUtil = {
+    featureCollection: function (features) {
+        return {
+            type: 'FeatureCollection',
+            features: features || []
+        };
+    },
+
+    feature: function (geometry, properties) {
+        return {
+            "type": "Feature",
+            "geometry": geometry,
+            "properties": properties || {}
+        };
+    },
+
+    latLngsToCoords: function (latlngs) {
+        var coords = [],
+            coord;
+
+        for (var i = 0, len = latlngs.length; i < len; i++) {
+            coord = L.GeoJSONUtil.latLngToCoord(latlngs[i]);
+            coords.push(coord);
+        }
+
+        return coords;
+    },
+
+    latLngToCoord: function (latlng) {
+        return [latlng.lng, latlng.lat];
+    }
+};
+
+L.WidgetFeatureGroup = L.LayerGroup.extend({
+    toGeoJSON: function () {
+        var features = [];
+        this.eachLayer(function (layer) {
+            features.push(layer.toGeoJSON());
+        });
+
+        return L.GeoJSONUtil.featureCollection(features);
+    }
+});
+
+L.widgetFeatureGroup = function (layers) {
+    return new L.WidgetFeatureGroup(layers);
+};
+
+L.Path.include({
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
+    }
+});
+
+L.FeatureGroup.include({
+    toGeometry: function () {
+        var coords = [];
+        this.eachLayer(function (layer) {
+            var geom = layer.toGeometry();
+            if (geom.type !== "Point") {
+                // We're assuming a FeatureGroup only contains Points
+                // (currently no support for 'GeometryCollections').
+                return;
+            }
+            coords.push(geom.coordinates);
+        });
+
+        return {
+            type: "MultiPoint",
+            coordinates: coords
+        };
+    }
+});
+
+L.Marker.include({
+    toGeometry: function () {
+        return {
+            type: "Point",
+            coordinates: L.GeoJSONUtil.latLngToCoord(this.getLatLng())
+        };
+    },
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
+    }
+});
+
+L.Polyline.include({
+    toGeometry: function () {
+        return {
+            type: "LineString",
+            coordinates: L.GeoJSONUtil.latLngsToCoords(this.getLatLngs())
+        };
+    }
+});
+
+L.Polygon.include({
+    toGeometry: function () {
+        return {
+            type: "Polygon",
+            coordinates: [L.GeoJSONUtil.latLngsToCoords(this.getLatLngs())]
+        };
+    }
+});
+
+L.MultiPolyline.include({
+    toGeometry: function () {
+        var coords = [];
+
+        this.eachLayer(function (layer) {
+            coords.push(layer.toGeometry().coordinates);
+        });
+
+        return {
+            type: "MultiLineString",
+            coordinates: coords
+        };
+    },
+
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
+    }
+});
+
+L.MultiPolygon.include({
+    toGeometry: function () {
+        var coords = [];
+
+        this.eachLayer(function (layer) {
+            coords.push(layer.toGeometry().coordinates);
+        });
+
+        return {
+            type: "MultiPolygon",
+            coordinates: coords
+        };
+    },
+
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
+    }
+});
+
 L.Control.Draw.mergeOptions({
     select: {
         title: 'Select items'
@@ -55,9 +197,7 @@ L.Control.Draw.include({
 L.Handler.Select = L.Handler.extend({
     includes: L.Mixin.Events,
 
-    options: {
-
-    },
+    options: {},
 
     initialize: function (map, options) {
         L.Util.setOptions(this, options);
@@ -239,7 +379,7 @@ L.Handler.Widget = L.Handler.extend({
 
     addHooks: function () {
         if (this._map && this.options.attach) {
-            this.vectors = L.layerGroup().addTo(this._map);
+            this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
             this.load(this._attach.value);
 
@@ -296,6 +436,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onSelected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.selectedVectorStyle);
         }
@@ -309,6 +450,7 @@ L.Handler.Widget = L.Handler.extend({
 
     _onDeselected: function (e) {
         var layer = e.layer;
+
         if (layer.setStyle) {
             layer.setStyle(this.options.defaultVectorStyle);
         }
@@ -319,7 +461,9 @@ L.Handler.Widget = L.Handler.extend({
 
     _unbind: function (e) {
         var layer = e.layer;
-        this.vectors.removeLayer(layer);
+        if (this.vectors.hasLayer(layer)) {
+            this.vectors.removeLayer(layer);
+        }
     },
 
     // Read GeoJSON features into widget vector layers.
@@ -339,98 +483,9 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     // Write widget vector layers to GeoJSON.
-    toGeoJSON: function () {
-        var geometry,
-            features = [];
-
-        this.vectors.eachLayer(function (layer) {
-            geometry = this.vectorToGeometry(layer);
-            features.push(this.feature(geometry));
-        }, this);
-
-        return this.featureCollection(features);
-    },
-
     write: function () {
-        var obj = this.toGeoJSON();
+        var obj = this.vectors.toGeoJSON();
         this._attach.value = JSON.stringify(obj);
-    },
-
-    vectorToGeometry: function (vector) {
-        var geometry = {};
-
-        if (vector instanceof L.MultiPolygon) {
-            geometry.type = "MultiPolygon";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                geometry.coordinates.push(this.vectorToGeometry(layer).coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.MultiPolyline) {
-            geometry.type = "MultiLineString";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                geometry.coordinates.push(this.vectorToGeometry(layer).coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.FeatureGroup) {
-            geometry.type = "MultiPoint";
-            geometry.coordinates = [];
-            vector.eachLayer(function (layer) {
-                var obj = this.vectorToGeometry(layer);
-                // We're assuming a FeatureGroup only contains Points
-                // (currently no support for 'GeometryCollections').
-                if (obj.type !== "Point") {
-                    return;
-                }
-                geometry.coordinates.push(obj.coordinates);
-            }, this);
-        }
-        else if (vector instanceof L.Polygon) {
-            geometry.type = "Polygon";
-            geometry.coordinates = [this._latLngsToCoords(vector.getLatLngs())];
-        }
-        else if (vector instanceof L.Polyline) {
-            geometry.type = "LineString";
-            geometry.coordinates = this._latLngsToCoords(vector.getLatLngs());
-        }
-        else if (vector instanceof L.Marker) {
-            geometry.type = "Point";
-            geometry.coordinates = this._latLngToCoord(vector.getLatLng());
-        }
-
-        return geometry;
-    },
-
-    featureCollection: function (features) {
-        return {
-            type: 'FeatureCollection',
-            features: features || []
-        };
-    },
-
-    feature: function (geometry, properties) {
-        return {
-            "type": "Feature",
-            "geometry": geometry,
-            "properties": properties || {}
-        };
-    },
-
-    _latLngsToCoords: function (latlngs) {
-        var coords = [],
-            coord;
-
-        for (var i = 0, len = latlngs.length; i < len; i++) {
-            coord = this._latLngToCoord(latlngs[i]);
-            coords.push(coord);
-        }
-
-        return coords;
-    },
-
-    _latLngToCoord: function (latlng) {
-        return [latlng.lng, latlng.lat];
     }
 });
 
