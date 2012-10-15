@@ -7,12 +7,11 @@ added to the map (via [Leaflet.draw], [Leaflet.paste], etc...) along with existi
 features can be encoded to GeoJSON and inserted into the bound HTML element 
 with ```map.widget.write()```.
 
-Includes [Leaflet.select]; a control extension for Leaflet.draw.  
-Leaflet.select.js provides a 'selector' tool allowing one or many features to 
-be selected. Actions can then be performed on selected features.
+Includes [Leaflet.select]; a control extension for Leaflet.draw. Leaflet.select.js provides 
+a 'selector' tool allowing one or many features to be selected. Actions can then be
+performed on selected features. _Currently only a 'remove' action has been implemented._
 
-Implemented actions:
- - Remove features.
+[Try the demo.](http://thegreat.github.com/Leaflet.widget/demo.html)
 
 ## Usage
 
