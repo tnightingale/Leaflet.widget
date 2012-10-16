@@ -19,9 +19,8 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     initialize: function (map, options) {
-        this._map = map;
-
         L.Util.setOptions(this, options);
+        L.Handler.prototype.initialize.call(this, map);
 
         if (!this._map.drawControl) {
             this._initDraw();
@@ -68,6 +67,8 @@ L.Handler.Widget = L.Handler.extend({
             circle: false,
             rectangle: false
         }).addTo(this._map);
+
+        this._map.selectControl = L.Control.select().addTo(this._map);
     },
 
     // Add vector layers.

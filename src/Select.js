@@ -35,7 +35,7 @@ L.Handler.Select = L.Handler.extend({
 
     initialize: function (map, options) {
         L.Util.setOptions(this, options);
-        this._map = map;
+        L.Handler.prototype.initialize.call(this, map);
     },
 
     enable: function () {
@@ -126,6 +126,7 @@ L.LayerGroup.include({
 
 L.Control.Select = L.Control.extend({
     options: {
+        title: 'Remove selected features',
         position: 'bottomright',
         remove: true
     },
@@ -137,7 +138,8 @@ L.Control.Select = L.Control.extend({
             container = L.DomUtil.create('div', class_name);
 
         if (this.options.remove) {
-            this._createButton('Remove selected features',
+            this._createButton(
+                    this.options.remove.title,
                     class_name + '-remove',
                     container,
                     this._delete,
@@ -171,8 +173,8 @@ L.Control.Select = L.Control.extend({
 });
 
 L.Map.addInitHook(function () {
-    if (this.options.select) {
-        this.selectControl = new L.Control.Select();
+    if (this.options.drawControl.select) {
+        this.selectControl = L.Control.select(this.options.drawControl.select);
         this.addControl(this.selectControl);
     }
 });

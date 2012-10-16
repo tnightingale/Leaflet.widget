@@ -24,6 +24,7 @@
     <!-- <script src="../dist/Leaflet.widget.min.js"></script> -->
   </head>
   <body>
+    <a id='button' href='#'>Add another widget</a>
     <div style="width:50%; height:200px" id="leaflet-widget-map-1"></div>
     <form id='leaflet-widget-form-1'>
       <textarea style="width:400px; height:150px" id='leaflet-widget-input-1'>
@@ -41,16 +42,21 @@
     </form>
     <script type='text/javascript'>
       var classname = 'leaflet-widget',
+          button = L.DomUtil.get('button'),
           map1 = create_widget(classname + '-map-1', classname + '-input-1', classname + '-form-1'),
-          map2 = create_widget(classname + '-map-2', classname + '-input-2', classname + '-form-2');
+          map2;
+
+      L.DomEvent.on(button, 'click', function () {
+        create_widget(classname + '-map-2', classname + '-input-2', classname + '-form-2');
+      });
+      L.DomEvent.on(button, 'submit', L.DomEvent.preventDefault);
 
       function create_widget (container, input, form) {
         var map = L.map(container, {
               center: [0.0, 100.0],
               zoom: 5,
               layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-              widget: { attach: input },
-              select: true
+              widget: { attach: input }
             }),
             form = L.DomUtil.get(form);
 
