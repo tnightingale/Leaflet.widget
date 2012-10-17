@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>Leaflet</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.css" />
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.ie.css" />
+    <![endif]-->
+    <link rel="stylesheet" href="http://jacobtoye.github.com/Leaflet.draw/leaflet.draw.css" />
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.js"></script>
+    <script src="http://jacobtoye.github.com/Leaflet.draw/leaflet.draw.js"></script>
+    <link rel="stylesheet" href="../dist/Leaflet.select.css" />
+    <link rel="stylesheet" href="../dist/Leaflet.widget.css" />
+    <!-- <link rel="stylesheet" href="../dist/Leaflet.widget.min.css" /> -->
+
+    <script src="../src/util/GeoJSONUtil.js"></script>
+    <script src="../src/layer/WidgetFeatureGroup.js"></script>
+    <script src="../src/layer/Path.js"></script>
+    <script src="../src/layer/MultiPolygon.js"></script>
+    <script src="../src/layer/MultiPolyline.js"></script>
+    <script src="../src/layer/FeatureGroup.js"></script>
+    <script src="../src/layer/Polygon.js"></script>
+    <script src="../src/layer/Polyline.js"></script>
+    <script src="../src/layer/Marker.js"></script>
+    <script src="../src/Select.js"></script>
+    <script src="../src/Widget.js"></script>
+
+    <!-- <script src="../dist/Leaflet.widget.min.js"></script> -->
+  </head>
+  <body>
+    <h2>Multiple: true; Cardinality: 0; (Default, unlimited)</h2>
+    <div style="height: 200px" id="leaflet-widget-map-1"></div>
+    <textarea id="leaflet-widget-input-1"></textarea>
+    <h2>Multiple: false;</h2>
+    <div style="height: 200px" id="leaflet-widget-map-2"></div>
+    <textarea id="leaflet-widget-input-2"></textarea>
+    <h2>Multiple: true; Cardinality: 3;</h2>
+    <div style="height: 200px" id="leaflet-widget-map-3"></div>
+    <textarea id="leaflet-widget-input-3"></textarea>
+
+    <script type='text/javascript'>
+      var classname = 'leaflet-widget',
+          map1 = L.map(classname + '-map-1', {
+            scrollWheelZoom: false,
+            center: [0.0, 100.0],
+            zoom: 5,
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            widget: {
+              attach: L.DomUtil.get(classname + '-input-1')
+            }
+          }),
+          map2 = L.map(classname + '-map-2', {
+            scrollWheelZoom: false,
+            center: [0.0, 100.0],
+            zoom: 5,
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            widget: {
+              attach: L.DomUtil.get(classname + '-input-2'),
+              multiple: false
+            }
+          }),
+          map3 = L.map(classname + '-map-3', {
+            scrollWheelZoom: false,
+            center: [0.0, 100.0],
+            zoom: 5,
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            widget: {
+              attach: L.DomUtil.get(classname + '-input-3'),
+              multiple: true,
+              cardinality: 3
+            }
+          });
+
+      map1.widget.enable();
+      map2.widget.enable();
+      map3.widget.enable();
+
+    </script>
+  </body>
+</html>

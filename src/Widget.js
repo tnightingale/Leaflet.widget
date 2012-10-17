@@ -6,6 +6,8 @@ L.Handler.Widget = L.Handler.extend({
     includes: L.Mixin.Events,
 
     options: {
+        multiple: true,
+        cardinality: 0, // Unlimited if multiple === true.
         defaultVectorStyle: {
             color: '#0033ff'
         },
@@ -31,6 +33,9 @@ L.Handler.Widget = L.Handler.extend({
         if (this._map && this.options.attach) {
             this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
+            this._full = false;
+            this._cardinality = this.options.multiple ? this.options.cardinality : 1;
+
             this.load(this._attach.value);
 
             this._map.drawControl.handlers.select.options.selectable = this.vectors;
@@ -74,6 +79,10 @@ L.Handler.Widget = L.Handler.extend({
     // Add vector layers.
     _addVector: function (feature) {
         this.vectors.addLayer(feature);
+
+        if (this._cardinality > 0 && this._cardinality <= this.vectors.size()) {
+            this._full = true;
+        }
     },
 
     // Handle features drawn by user.
@@ -81,7 +90,7 @@ L.Handler.Widget = L.Handler.extend({
         var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0],
             vector = e[key] || false;
 
-        if (vector) {
+        if (vector && !this._full) {
             this._addVector(vector);
         }
     },
@@ -115,19 +124,28 @@ L.Handler.Widget = L.Handler.extend({
         var layer = e.layer;
         if (this.vectors.hasLayer(layer)) {
             this.vectors.removeLayer(layer);
+
+            if (this._cardinality > this.vectors.size()) {
+                this._full = false;
+            }
         }
     },
 
     // Read GeoJSON features into widget vector layers.
     load: function (geojson) {
-        var data = typeof geojson === 'string' ? JSON.parse(geojson) : geojson,
+        var data,
             on_each = function (feature, layer) {
                 this._addVector(layer);
             };
 
-        if (!data) {
+        // Empty data isn't an exceptional scenario.
+        if (!geojson) {
+            // Return like nothing happened.
             return;
         }
+
+        // Invalid GeoJSON is and an exception will be thrown.
+        data = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 
         return L.geoJson(data, {
             onEachFeature: L.Util.bind(on_each, this)
