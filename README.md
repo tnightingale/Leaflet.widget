@@ -38,7 +38,7 @@ var form = L.DomUtil.get('leaflet-widget-form'),
     map = L.map('map', {
             layers: [layer]
             widget: { attach: 'leaflet-widget-input' },
-            select: true
+            cardinality: 4
           });
 
 // It's important to enable the widget to ensure layers are added to the map.
@@ -47,6 +47,10 @@ map.widget.enable();
 // Write widget features when form is submitted.
 L.DomEvent.on(form, 'submit', map.widget.write, map.widget);
 ```
+
+By default an unlimited number of features can be added to the widget. To allow
+only one, set ```multiple = false```. You can limit to X number of features by
+setting ```cardiniality = X```.
 
 ## Requires
 - [Leaflet] - _Included in /lib._
