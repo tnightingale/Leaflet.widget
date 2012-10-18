@@ -33,7 +33,12 @@ L.WidgetFeatureGroup = L.LayerGroup.extend({
 
     size: function () {
         return this._size;
-    }
+    },
+
+    /**
+     * Borrowing from L.FeatureGroup.
+     */
+    getBounds: L.FeatureGroup.prototype.getBounds
 });
 
 L.widgetFeatureGroup = function (layers) {
