@@ -87,7 +87,12 @@ L.WidgetFeatureGroup = L.LayerGroup.extend({
 
     size: function () {
         return this._size;
-    }
+    },
+
+    /**
+     * Borrowing from L.FeatureGroup.
+     */
+    getBounds: L.FeatureGroup.prototype.getBounds
 });
 
 L.widgetFeatureGroup = function (layers) {
@@ -383,6 +388,7 @@ L.Handler.Widget = L.Handler.extend({
     options: {
         multiple: true,
         cardinality: 0, // Unlimited if multiple === true.
+        autoCenter: true,
         defaultVectorStyle: {
             color: '#0033ff'
         },
@@ -422,6 +428,10 @@ L.Handler.Widget = L.Handler.extend({
                 'deselected': this._onDeselected,
                 'layerremove': this._unbind
             }, this);
+
+            if (this.options.autoCenter) {
+                this._map.fitBounds(this.vectors.getBounds());
+            }
         }
     },
 
