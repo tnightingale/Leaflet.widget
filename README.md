@@ -48,8 +48,11 @@ map.widget.enable();
 L.DomEvent.on(form, 'submit', map.widget.write, map.widget);
 ```
 
+The widget will center on any features loaded into the map from the attached 
+element. To disable this set the option: ```autoCenter = false```.
+
 By default an unlimited number of features can be added to the widget. To allow
-only one, set ```multiple = false```. You can limit to X number of features by
+only one, set the option: ```multiple = false```. You can limit to X number of features by
 setting ```cardiniality = X```.
 
 ## Requires
