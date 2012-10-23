@@ -49,7 +49,7 @@ L.Handler.Widget = L.Handler.extend({
                 'layerremove': this._unbind
             }, this);
 
-            if (this.options.autoCenter) {
+            if (this.vectors.size() > 0 && this.options.autoCenter) {
                 this._map.fitBounds(this.vectors.getBounds());
             }
         }

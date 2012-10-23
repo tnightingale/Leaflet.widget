@@ -31,6 +31,8 @@
     <textarea id="leaflet-widget-input-1">
 {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[102,0.5]},"properties":{}},{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102,0],[103,1],[104,0],[105,1]]},"properties":{}},{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100,0],[101,0],[101,1],[100,1],[100,0]]]},"properties":{}}]}
     </textarea>
+    <div style="height: 200px" id="leaflet-widget-map-2"></div>
+    <textarea id="leaflet-widget-input-2"></textarea>
 
     <script type='text/javascript'>
       var classname = 'leaflet-widget',
@@ -42,9 +44,19 @@
             widget: {
               attach: L.DomUtil.get(classname + '-input-1')
             }
+          }),
+          map2 = L.map(classname + '-map-2', {
+            scrollWheelZoom: false,
+            center: [0, 0],
+            zoom: 5,
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            widget: {
+              attach: L.DomUtil.get(classname + '-input-2')
+            }
           });
 
       map1.widget.enable();
+      map2.widget.enable();
 
     </script>
   </body>
