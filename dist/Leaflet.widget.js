@@ -1,4 +1,4 @@
-/*! Leaflet.widget - v0.1.0 - 2012-10-17
+/*! Leaflet.widget - v0.1.0 - 2012-10-23
 * Copyright (c) 2012 function () {
 
 // If the string looks like an identifier, then we can return it as is.
@@ -429,7 +429,7 @@ L.Handler.Widget = L.Handler.extend({
                 'layerremove': this._unbind
             }, this);
 
-            if (this.options.autoCenter) {
+            if (this.vectors.size() > 0 && this.options.autoCenter) {
                 this._map.fitBounds(this.vectors.getBounds());
             }
         }
