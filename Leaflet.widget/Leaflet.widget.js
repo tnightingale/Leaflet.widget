@@ -1,4 +1,4 @@
-/*! Leaflet.widget - v0.1.0 - 2012-10-15
+/*! Leaflet.widget - v0.1.0 - 2012-10-23
 * Copyright (c) 2012 function () {
 
 // If the string looks like an identifier, then we can return it as is.
@@ -56,6 +56,26 @@ L.GeoJSONUtil = {
 };
 
 L.WidgetFeatureGroup = L.LayerGroup.extend({
+    initialize: function (layers) {
+        L.LayerGroup.prototype.initialize.call(this, layers);
+        this._size = layers ? layers.length : 0;
+    },
+
+    addLayer: function (layer) {
+        this._size += 1;
+        L.LayerGroup.prototype.addLayer.call(this, layer);
+    },
+
+    removeLayer: function (layer) {
+        this._size -= 1;
+        L.LayerGroup.prototype.removeLayer.call(this, layer);
+    },
+
+    clearLayers: function () {
+        this._size = 0;
+        L.LayerGroup.prototype.clearLayers.call(this);
+    },
+
     toGeoJSON: function () {
         var features = [];
         this.eachLayer(function (layer) {
@@ -63,7 +83,16 @@ L.WidgetFeatureGroup = L.LayerGroup.extend({
         });
 
         return L.GeoJSONUtil.featureCollection(features);
-    }
+    },
+
+    size: function () {
+        return this._size;
+    },
+
+    /**
+     * Borrowing from L.FeatureGroup.
+     */
+    getBounds: L.FeatureGroup.prototype.getBounds
 });
 
 L.widgetFeatureGroup = function (layers) {
@@ -201,7 +230,7 @@ L.Handler.Select = L.Handler.extend({
 
     initialize: function (map, options) {
         L.Util.setOptions(this, options);
-        this._map = map;
+        L.Handler.prototype.initialize.call(this, map);
     },
 
     enable: function () {
@@ -292,6 +321,7 @@ L.LayerGroup.include({
 
 L.Control.Select = L.Control.extend({
     options: {
+        title: 'Remove selected features',
         position: 'bottomright',
         remove: true
     },
@@ -303,7 +333,8 @@ L.Control.Select = L.Control.extend({
             container = L.DomUtil.create('div', class_name);
 
         if (this.options.remove) {
-            this._createButton('Remove selected features',
+            this._createButton(
+                    this.options.remove.title,
                     class_name + '-remove',
                     container,
                     this._delete,
@@ -337,8 +368,8 @@ L.Control.Select = L.Control.extend({
 });
 
 L.Map.addInitHook(function () {
-    if (this.options.select) {
-        this.selectControl = new L.Control.Select();
+    if (this.options.drawControl.select) {
+        this.selectControl = L.Control.select(this.options.drawControl.select);
         this.addControl(this.selectControl);
     }
 });
@@ -355,6 +386,9 @@ L.Handler.Widget = L.Handler.extend({
     includes: L.Mixin.Events,
 
     options: {
+        multiple: true,
+        cardinality: 0, // Unlimited if multiple === true.
+        autoCenter: true,
         defaultVectorStyle: {
             color: '#0033ff'
         },
@@ -368,9 +402,8 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     initialize: function (map, options) {
-        this._map = map;
-
         L.Util.setOptions(this, options);
+        L.Handler.prototype.initialize.call(this, map);
 
         if (!this._map.drawControl) {
             this._initDraw();
@@ -381,6 +414,9 @@ L.Handler.Widget = L.Handler.extend({
         if (this._map && this.options.attach) {
             this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
+            this._full = false;
+            this._cardinality = this.options.multiple ? this.options.cardinality : 1;
+
             this.load(this._attach.value);
 
             this._map.drawControl.handlers.select.options.selectable = this.vectors;
@@ -392,6 +428,10 @@ L.Handler.Widget = L.Handler.extend({
                 'deselected': this._onDeselected,
                 'layerremove': this._unbind
             }, this);
+
+            if (this.vectors.size() > 0 && this.options.autoCenter) {
+                this._map.fitBounds(this.vectors.getBounds());
+            }
         }
     },
 
@@ -417,11 +457,17 @@ L.Handler.Widget = L.Handler.extend({
             circle: false,
             rectangle: false
         }).addTo(this._map);
+
+        this._map.selectControl = L.Control.select().addTo(this._map);
     },
 
     // Add vector layers.
     _addVector: function (feature) {
         this.vectors.addLayer(feature);
+
+        if (this._cardinality > 0 && this._cardinality <= this.vectors.size()) {
+            this._full = true;
+        }
     },
 
     // Handle features drawn by user.
@@ -429,7 +475,7 @@ L.Handler.Widget = L.Handler.extend({
         var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0],
             vector = e[key] || false;
 
-        if (vector) {
+        if (vector && !this._full) {
             this._addVector(vector);
         }
     },
@@ -463,19 +509,28 @@ L.Handler.Widget = L.Handler.extend({
         var layer = e.layer;
         if (this.vectors.hasLayer(layer)) {
             this.vectors.removeLayer(layer);
+
+            if (this._cardinality > this.vectors.size()) {
+                this._full = false;
+            }
         }
     },
 
     // Read GeoJSON features into widget vector layers.
     load: function (geojson) {
-        var data = typeof geojson === 'string' ? JSON.parse(geojson) : geojson,
+        var data,
             on_each = function (feature, layer) {
                 this._addVector(layer);
             };
 
-        if (!data) {
+        // Empty data isn't an exceptional scenario.
+        if (!geojson) {
+            // Return like nothing happened.
             return;
         }
+
+        // Invalid GeoJSON is and an exception will be thrown.
+        data = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 
         return L.geoJson(data, {
             onEachFeature: L.Util.bind(on_each, this)
