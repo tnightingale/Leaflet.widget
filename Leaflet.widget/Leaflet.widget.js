@@ -1,26 +1,6 @@
-/*! Leaflet.widget - v0.1.0 - 2012-10-23
-* Copyright (c) 2012 function () {
-
-// If the string looks like an identifier, then we can return it as is.
-// If the string contains no control characters, no quote characters, and no
-// backslash characters, then we can simply slap some quotes around it.
-// Otherwise we must also replace the offending characters with safe
-// sequences.
-
-            if (ix.test(this)) {
-                return this;
-            }
-            if (nx.test(this)) {
-                return '"' + this.replace(nxg, function (a) {
-                    var c = escapes[a];
-                    if (c) {
-                        return c;
-                    }
-                    return '\\u' + ('0000' + a.charCodeAt().toString(16)).slice(-4);
-                }) + '"';
-            }
-            return '"' + this + '"';
-        }; */
+/*! Leaflet.widget - v0.1.0 - 2012-10-24
+* Copyright (c) 2012 Affinity Bridge - Tom Nightingale <tom@affinitybridge.com> (http://affinitybridge.com)
+* Licensed BSD */
 
 L.GeoJSONUtil = {
     featureCollection: function (features) {
