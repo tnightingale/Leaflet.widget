@@ -1,4 +1,4 @@
-/*! Leaflet.widget - v0.1.0 - 2012-10-24
+/*! Leaflet.widget - v0.1.0 - 2012-10-31
 * Copyright (c) 2012 Affinity Bridge - Tom Nightingale <tom@affinitybridge.com> (http://affinitybridge.com)
 * Licensed BSD */
 
@@ -128,9 +128,16 @@ L.Polyline.include({
 
 L.Polygon.include({
     toGeometry: function () {
+        var latlngs = this.getLatLngs();
+        // Close the polygon to create a LinearRing as per GeoJSON spec.
+        // - http://www.geojson.org/geojson-spec.html#polygon
+        latlngs.push(latlngs[0]);
+
+        // TODO: add support for 'holes'.
+
         return {
             type: "Polygon",
-            coordinates: [L.GeoJSONUtil.latLngsToCoords(this.getLatLngs())]
+            coordinates: [L.GeoJSONUtil.latLngsToCoords(latlngs)]
         };
     }
 });
