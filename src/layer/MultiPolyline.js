@@ -10,9 +10,5 @@ L.MultiPolyline.include({
             type: "MultiLineString",
             coordinates: coords
         };
-    },
-
-    toGeoJSON: function () {
-        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });

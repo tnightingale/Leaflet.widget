@@ -10,9 +10,5 @@ L.MultiPolygon.include({
             type: "MultiPolygon",
             coordinates: coords
         };
-    },
-
-    toGeoJSON: function () {
-        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });

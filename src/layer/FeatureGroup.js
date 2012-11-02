@@ -15,5 +15,9 @@ L.FeatureGroup.include({
             type: "MultiPoint",
             coordinates: coords
         };
+    },
+
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });
