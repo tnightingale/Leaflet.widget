@@ -1,4 +1,4 @@
-/*! Leaflet.widget - v0.1.0 - 2012-10-31
+/*! Leaflet.widget - v0.1.0 - 2012-11-02
 * Copyright (c) 2012 Affinity Bridge - Tom Nightingale <tom@affinitybridge.com> (http://affinitybridge.com)
 * Licensed BSD */
 
@@ -102,6 +102,10 @@ L.FeatureGroup.include({
             type: "MultiPoint",
             coordinates: coords
         };
+    },
+
+    toGeoJSON: function () {
+        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });
 
@@ -154,10 +158,6 @@ L.MultiPolyline.include({
             type: "MultiLineString",
             coordinates: coords
         };
-    },
-
-    toGeoJSON: function () {
-        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });
 
@@ -173,10 +173,6 @@ L.MultiPolygon.include({
             type: "MultiPolygon",
             coordinates: coords
         };
-    },
-
-    toGeoJSON: function () {
-        return L.GeoJSONUtil.feature(this.toGeometry());
     }
 });
 
