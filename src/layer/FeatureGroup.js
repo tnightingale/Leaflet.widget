@@ -17,7 +17,33 @@ L.FeatureGroup.include({
         };
     },
 
+    // TODO: Refactor this so we don't require two passes.
+    isCollection: function () {
+        var is_collection = false,
+            geoms = [];
+
+        this.eachLayer(function (layer) {
+            if (!is_collection && layer.toGeometry().type !== "Point") {
+                is_collection = true;
+            }
+        });
+
+        return is_collection;
+    },
+
     toGeoJSON: function () {
-        return L.GeoJSONUtil.feature(this.toGeometry());
+        if (this.isCollection()) {
+            var geoms = [];
+            this.eachLayer(function (layer) {
+                geoms.push(layer.toGeometry());
+            });
+            return {
+                type: "GeometryCollection",
+                geometries: geoms
+            };
+        }
+        else {
+            return L.GeoJSONUtil.feature(this.toGeometry());
+        }
     }
 });
