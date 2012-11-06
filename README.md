@@ -59,7 +59,7 @@ setting ```cardiniality = X```.
 - [Leaflet] - _Included in /lib._
 - [Leaflet.draw] - _Included in /lib._
 
-[Leaflet]: leafletjs.com
+[Leaflet]: http://leafletjs.com
 [Leaflet.draw]: https://github.com/jacobtoye/Leaflet.draw
 [Leaflet.paste]: https://github.com/tnightingale/Leaflet.paste
 [Leaflet.select]: https://github.com/tnightingale/Leaflet.widget/blob/master/src/Leaflet.select.js
