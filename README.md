@@ -11,7 +11,7 @@ Includes [Leaflet.select]; a control extension for Leaflet.draw. Leaflet.select.
 a 'selector' tool allowing one or many features to be selected. Actions can then be
 performed on selected features. _Currently only a 'remove' action has been implemented._
 
-[Try the demo.](http://thegreat.github.com/Leaflet.widget/demo.html)
+[Try the demo.](http://tnightingale.github.com/Leaflet.widget/demo.html)
 
 ## Usage
 
@@ -59,7 +59,7 @@ setting ```cardiniality = X```.
 - [Leaflet] - _Included in /lib._
 - [Leaflet.draw] - _Included in /lib._
 
-[Leaflet]: leaflet.cloudmade.com
+[Leaflet]: leafletjs.com
 [Leaflet.draw]: https://github.com/jacobtoye/Leaflet.draw
-[Leaflet.paste]: https://github.com/thegreat/Leaflet.paste
-[Leaflet.select]: https://github.com/thegreat/Leaflet.widget/blob/master/src/Leaflet.select.js
+[Leaflet.paste]: https://github.com/tnightingale/Leaflet.paste
+[Leaflet.select]: https://github.com/tnightingale/Leaflet.widget/blob/master/src/Leaflet.select.js
