@@ -5,12 +5,12 @@
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/thegreat/Leaflet.widget.git"
+    "url": "git://github.com/tnightingale/Leaflet.widget.git"
   },
   "licenses": [
     {
       "type": "BSD",
-      "url": "https://github.com/thegreat/Leaflet.widget/blob/master/LICENSE-BSD"
+      "url": "https://github.com/tnightingale/Leaflet.widget/blob/master/LICENSE-BSD"
     }
   ],
   "engines": {
