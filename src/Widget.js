@@ -64,7 +64,7 @@ L.Handler.Widget = L.Handler.extend({
             this._map.removeLayer(this.vectors);
 
             this._map.off({
-                'draw:poly-created draw:marker-created': this._onCreated,
+                'draw:created': this._onCreated,
                 'layerremove': this._unbind
             }, this);
         }
