@@ -213,13 +213,25 @@ L.Handler.Widget = L.Handler.extend({
         multiple: true,
         cardinality: 0, // Unlimited if multiple === true.
         autoCenter: true,
-        defaultVectorStyle: {
-            color: '#0033ff'
+        polyline: {
+            shapeOptions: {
+                drawVectorStyle: {
+                    color: '#F0F',
+                    clickable: true
+                }
+            }
         },
-        drawVectorStyle: {
-            color: '#F0F',
-            clickable: true
-        }
+        polygon: {
+            shapeOptions: {
+                drawVectorStyle: {
+                    color: '#F0F',
+                    clickable: true
+                }
+            }
+        },
+        rectangle: true,
+        circle: true,
+        marker: true
     },
 
     initialize: function (map, options) {
@@ -268,10 +280,11 @@ L.Handler.Widget = L.Handler.extend({
         this._map.drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
-                polyline: { shapeOptions: this.options.drawVectorStyle },
-                polygon: { shapeOptions: this.options.drawVectorStyle },
-                circle: true,
-                rectangle: true
+                polyline: this.options.polyline,
+                polygon: this.options.polygon,
+                rectangle: this.options.rectangle,
+                circle: this.options.circle,
+                marker: this.options.marker
             },
             edit: { featureGroup: this.vectors }
         }).addTo(this._map);
