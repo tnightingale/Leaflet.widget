@@ -12,9 +12,6 @@ L.Handler.Widget = L.Handler.extend({
         defaultVectorStyle: {
             color: '#0033ff'
         },
-        selectedVectorStyle: {
-            color: '#F00'
-        },
         drawVectorStyle: {
             color: '#F0F',
             clickable: true
@@ -32,20 +29,15 @@ L.Handler.Widget = L.Handler.extend({
 
     addHooks: function () {
         if (this._map && this.options.attach) {
-            this.vectors = L.widgetFeatureGroup().addTo(this._map);
             this._attach = L.DomUtil.get(this.options.attach);
             this._full = false;
             this._cardinality = this.options.multiple ? this.options.cardinality : 1;
 
             this.load(this._attach.value);
 
-            this._map.drawControl.handlers.select.options.selectable = this.vectors;
-
             // Map event handlers.
             this._map.on({
-                'draw:poly-created draw:marker-created': this._onCreated,
-                'selected': this._onSelected,
-                'deselected': this._onDeselected,
+                'draw:created': this._onCreated,
                 'layerremove': this._unbind
             }, this);
 
@@ -58,27 +50,27 @@ L.Handler.Widget = L.Handler.extend({
     removeHooks: function () {
         if (this._map) {
             this._map.removeLayer(this.vectors);
-            delete this.vectors;
 
             this._map.off({
                 'draw:poly-created draw:marker-created': this._onCreated,
-                'selected': this._onSelected,
-                'deselected': this._onDeselected,
                 'layerremove': this._unbind
             }, this);
         }
     },
 
     _initDraw: function () {
+        this.vectors = L.widgetFeatureGroup().addTo(this._map);
+
         this._map.drawControl = new L.Control.Draw({
             position: 'topright',
-            polyline: { shapeOptions: this.options.drawVectorStyle },
-            polygon: { shapeOptions: this.options.drawVectorStyle },
-            circle: false,
-            rectangle: false
+            draw: {
+                polyline: { shapeOptions: this.options.drawVectorStyle },
+                polygon: { shapeOptions: this.options.drawVectorStyle },
+                circle: true,
+                rectangle: true
+            },
+            edit: { featureGroup: this.vectors }
         }).addTo(this._map);
-
-        this._map.selectControl = L.Control.select().addTo(this._map);
     },
 
     // Add vector layers.
@@ -92,36 +84,11 @@ L.Handler.Widget = L.Handler.extend({
 
     // Handle features drawn by user.
     _onCreated: function (e) {
-        var key = /(?!:)[a-z]+(?=-)/.exec(e.type)[0],
-            vector = e[key] || false;
+        var type = e.layerType,
+        layer = e.layer;
 
-        if (vector && !this._full) {
-            this._addVector(vector);
-        }
-    },
-
-    _onSelected: function (e) {
-        var layer = e.layer;
-
-        if (layer.setStyle) {
-            layer.setStyle(this.options.selectedVectorStyle);
-        }
-        else {
-            var icon = layer.options.icon;
-            icon.options.className = 'marker-selected';
-            layer.setIcon(icon);
-            icon.options.className = '';
-        }
-    },
-
-    _onDeselected: function (e) {
-        var layer = e.layer;
-
-        if (layer.setStyle) {
-            layer.setStyle(this.options.defaultVectorStyle);
-        }
-        else {
-            layer.setIcon(layer.options.icon);
+        if (layer && !this._full) {
+            this._addVector(layer);
         }
     },
 
