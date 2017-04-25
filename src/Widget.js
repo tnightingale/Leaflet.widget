@@ -50,7 +50,7 @@ L.Handler.Widget = L.Handler.extend({
             // Map event handlers.
             this._map.on({
                 'draw:created': this._onCreated,
-                'layerremove': this._unbind
+                'draw:deleted': this._unbind
             }, this);
 
             if (this.vectors.size() > 0 && this.options.autoCenter) {
@@ -65,7 +65,7 @@ L.Handler.Widget = L.Handler.extend({
 
             this._map.off({
                 'draw:created': this._onCreated,
-                'layerremove': this._unbind
+                'draw:deleted': this._unbind
             }, this);
         }
     },
@@ -106,13 +106,10 @@ L.Handler.Widget = L.Handler.extend({
     },
 
     _unbind: function (e) {
-        var layer = e.layer;
-        if (this.vectors.hasLayer(layer)) {
-            this.vectors.removeLayer(layer);
+        var layers = e.layers;
 
-            if (this._cardinality > this.vectors.size()) {
-                this._full = false;
-            }
+        if (this._cardinality > this.vectors.size()) {
+            this._full = false;
         }
     },
 
