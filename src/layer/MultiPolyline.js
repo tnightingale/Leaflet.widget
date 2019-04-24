@@ -1,4 +1,4 @@
-L.MultiPolyline.include({
+L.Polyline.include({
     toGeometry: function () {
         var coords = [];
 

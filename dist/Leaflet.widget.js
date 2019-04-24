@@ -172,7 +172,7 @@ L.Polygon.include({
     }
 });
 
-L.MultiPolyline.include({
+L.Polyline.include({
     toGeometry: function () {
         var coords = [];
 
